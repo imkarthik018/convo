@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import Login from './pages/Login';
+import { getStoredUser, getStoredToken, logout } from './services/auth';
 import {
   addConversation,
   getAllConversations,
@@ -19,10 +21,14 @@ function App() {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [user, setUser] = useState(() => getStoredUser());
+  const [isAuthenticated, setIsAuthenticated] = useState(() => !!getStoredToken());
 
   useEffect(() => {
-    loadConversations();
-  }, []);
+    if (isAuthenticated) {
+      loadConversations();
+    }
+  }, [isAuthenticated]);
 
   const loadConversations = async () => {
     setLoading(true);
@@ -129,11 +135,62 @@ function App() {
     }
   };
 
+  const handleLogin = (userData) => {
+    setUser(userData);
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setUser(null);
+    setIsAuthenticated(false);
+    setConversations([]);
+  };
+
+  const getRoleBadge = () => {
+    if (!user) return null;
+    const roleColors = {
+      'ROLE_ADMIN': '#e74c3c',
+      'ROLE_RESEARCHER': '#3498db',
+      'ROLE_ENGINEER': '#9b59b6',
+      'ROLE_PREMIUM': '#f39c12',
+      'ROLE_USER': '#95a5a6'
+    };
+    const roleNames = {
+      'ROLE_ADMIN': 'Admin',
+      'ROLE_RESEARCHER': 'Researcher',
+      'ROLE_ENGINEER': 'Engineer',
+      'ROLE_PREMIUM': 'Premium',
+      'ROLE_USER': 'User'
+    };
+    return (
+      <span className="role-badge" style={{ backgroundColor: roleColors[user.role] }}>
+        {roleNames[user.role]}
+      </span>
+    );
+  };
+
+  // Show login page if not authenticated
+  if (!isAuthenticated) {
+    return <Login onLogin={handleLogin} />;
+  }
+
   return (
     <div className="app-container">
       <div className="header">
-        <h1>ChatGPT Conversation Manager</h1>
-        <p>Organize your AI chats efficiently</p>
+        <div className="header-top">
+          <div>
+            <h1>ChatGPT Conversation Manager</h1>
+            <p>Organize your AI chats efficiently</p>
+          </div>
+          <div className="user-info">
+            <div>
+              <span className="username">Welcome, {user.username}!</span>
+              {getRoleBadge()}
+            </div>
+            <button className="logout-btn" onClick={handleLogout}>Logout</button>
+          </div>
+        </div>
         {apiError && (
           <div style={{color: 'orange', padding: '10px', background: '#fff3cd', border: '1px solid #ffeaa7', borderRadius: '4px', margin: '10px 0'}}>
             ⚠️ Backend API is not available. Please ensure the Spring Boot server is running on port 8081.
