@@ -69,6 +69,13 @@
 .chat-form button:hover {
   background: #357ab7;
 }
+.chat-form button:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+}
+.chat-form button:disabled:hover {
+  background: #cccccc;
+}
 .chat-form button[type="button"] {
   background: #95a5a6;
 }
@@ -135,4 +142,9 @@
   text-align: center;
   color: #777;
   font-style: italic;
+}
+
+/* Loading state */
+.chat-list {
+  position: relative;
 }

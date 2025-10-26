@@ -17,12 +17,16 @@ function App() {
   const [filter, setFilter] = useState('All Conversations');
   const [apiError, setApiError] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     loadConversations();
   }, []);
 
   const loadConversations = async () => {
+    setLoading(true);
+    setErrorMessage('');
     try {
       const data = await getAllConversations();
       setConversations(data);
@@ -31,6 +35,9 @@ function App() {
       console.error('Error loading conversations:', error);
       setConversations([]);
       setApiError(true);
+      setErrorMessage(error.message || 'Failed to load conversations');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -38,6 +45,8 @@ function App() {
     e.preventDefault();
     if (!prompt.trim() || !response.trim()) return;
 
+    setLoading(true);
+    setErrorMessage('');
     try {
       const conversationData = {
         prompt,
@@ -56,18 +65,28 @@ function App() {
       setPrompt('');
       setResponse('');
       setCategory('General');
-      loadConversations();
+      await loadConversations();
     } catch (error) {
       console.error('Error saving conversation:', error);
+      setErrorMessage(error.message || 'Failed to save conversation');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this conversation?')) return;
+    
+    setLoading(true);
+    setErrorMessage('');
     try {
       await deleteConversation(id);
-      loadConversations();
+      await loadConversations();
     } catch (error) {
       console.error('Error deleting conversation:', error);
+      setErrorMessage(error.message || 'Failed to delete conversation');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -88,6 +107,8 @@ function App() {
   const handleFilterChange = async (e) => {
     const value = e.target.value;
     setFilter(value);
+    setLoading(true);
+    setErrorMessage('');
 
     try {
       if (value === 'All Conversations') {
@@ -102,6 +123,9 @@ function App() {
       }
     } catch (error) {
       console.error('Error filtering conversations:', error);
+      setErrorMessage(error.message || 'Failed to filter conversations');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -112,7 +136,17 @@ function App() {
         <p>Organize your AI chats efficiently</p>
         {apiError && (
           <div style={{color: 'orange', padding: '10px', background: '#fff3cd', border: '1px solid #ffeaa7', borderRadius: '4px', margin: '10px 0'}}>
-            ⚠️ Backend API is not available. The app will work in demo mode.
+            ⚠️ Backend API is not available. Please ensure the Spring Boot server is running on port 8081.
+          </div>
+        )}
+        {errorMessage && (
+          <div style={{color: '#721c24', padding: '10px', background: '#f8d7da', border: '1px solid #f5c6cb', borderRadius: '4px', margin: '10px 0'}}>
+            ❌ {errorMessage}
+          </div>
+        )}
+        {loading && (
+          <div style={{color: '#004085', padding: '10px', background: '#cce5ff', border: '1px solid #99ccff', borderRadius: '4px', margin: '10px 0'}}>
+            ⏳ Loading...
           </div>
         )}
       </div>
@@ -137,8 +171,8 @@ function App() {
           <option value="Coding">Coding</option>
           <option value="Career">Career</option>
         </select>
-        <button type="submit">{editingId ? 'Update' : 'Add'} Conversation</button>
-        {editingId && <button type="button" onClick={handleCancelEdit}>Cancel</button>}
+        <button type="submit" disabled={loading}>{editingId ? 'Update' : 'Add'} Conversation</button>
+        {editingId && <button type="button" onClick={handleCancelEdit} disabled={loading}>Cancel</button>}
       </form>
 
       <div className="controls">

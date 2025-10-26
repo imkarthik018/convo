@@ -33,10 +33,10 @@ import java.util.List;
 /**
  * Stateless JWT Bearer security using Spring Security's OAuth2 Resource Server.
  * Exposes:
- *  - SecurityFilterChain with /api/auth/** and OpenAPI endpoints permitted
- *  - JwtDecoder based on HS256 secret
- *  - JwtAuthenticationConverter mapping "roles" claim -> GrantedAuthorities
- *  - Basic CORS for localhost dev
+ * - SecurityFilterChain with /api/auth/** and OpenAPI endpoints permitted
+ * - JwtDecoder based on HS256 secret
+ * - JwtAuthenticationConverter mapping "roles" claim -> GrantedAuthorities
+ * - Basic CORS for localhost dev
  */
 @Configuration
 @EnableWebSecurity
@@ -50,30 +50,30 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .cors(Customizer.withDefaults())
-            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                // Auth/health/docs endpoints that should stay public
-                .requestMatchers(
-                    "/api/auth/**",
-                    "/actuator/health",
-                    "/api/users",
-                    "/v3/api-docs/**",
-                    "/swagger-ui/**",
-                    "/swagger-ui.html",
-                    "/api/**"
-                ).permitAll()
-                .anyRequest().authenticated()
-            )
-            .oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
-            );
+                .csrf(csrf -> csrf.disable())
+                .cors(Customizer.withDefaults())
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        // Auth/health/docs endpoints that should stay public
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/actuator/health",
+                                "/api/users",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/api/**")
+                        .permitAll()
+                        .anyRequest().authenticated())
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
 
         return http.build();
     }
 
-    /** Use the same HS256 key for verifying JWTs as used by JWTUtil to sign them. */
+    /**
+     * Use the same HS256 key for verifying JWTs as used by JWTUtil to sign them.
+     */
     @Bean
     public JwtDecoder jwtDecoder() {
         SecretKey key = secretKeyFrom(jwtSecret);
@@ -94,7 +94,8 @@ public class SecurityConfig {
 
     /**
      * Map "roles" claim to GrantedAuthorities. We expect values like "ROLE_USER".
-     * (If your tokens use plain names like "USER", setAuthorityPrefix("ROLE_") instead.)
+     * (If your tokens use plain names like "USER", setAuthorityPrefix("ROLE_")
+     * instead.)
      */
     @Bean
     public Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter() {
@@ -118,16 +119,17 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
         cfg.setAllowedOrigins(List.of(
-            "https://8081-fddecedccde329052728bccfaccecftwo.premiumproject.examly.io",
-            "http://localhost:3000"
-        ));
+                "https://8081-fddecedccde329052728bccfaccecftwo.premiumproject.examly.io",
+                "http://localhost:3000",
+                "http://localhost:3001",
+                "http://localhost:8083"));
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("*")); // allow all headers for simplicity
         cfg.setAllowCredentials(true);
-    
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", cfg);
         return source;
     }
-    
+
 }
