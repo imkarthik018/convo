@@ -1,0 +1,11 @@
+com\examly\springapp\configuration\JWTUtil.class
+com\examly\springapp\configuration\TestSecurityConfig.class
+com\examly\springapp\SpringappApplication.class
+com\examly\springapp\configuration\CorsConfiguration.class
+com\examly\springapp\model\Conversation.class
+com\examly\springapp\controller\ConversationController.class
+GlobalExceptionHandler.class
+com\examly\springapp\configuration\SecurityConfig.class
+com\examly\springapp\exception\CoversationNotFoundException.class
+com\examly\springapp\service\ConversationService.class
+com\examly\springapp\repository\ConversationRepository.class

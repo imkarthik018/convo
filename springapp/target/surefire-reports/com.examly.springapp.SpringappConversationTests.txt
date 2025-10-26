@@ -1,0 +1,14 @@
+-------------------------------------------------------------------------------
+Test set: com.examly.springapp.SpringappConversationTests
+-------------------------------------------------------------------------------
+Tests run: 17, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 5.303 s <<< FAILURE! - in com.examly.springapp.SpringappConversationTests
+com.examly.springapp.SpringappConversationTests.AddConversationReturns200  Time elapsed: 0.308 s  <<< FAILURE!
+java.lang.AssertionError: No value at JSON path "$.prompt"
+	at com.examly.springapp.SpringappConversationTests.AddConversationReturns200(SpringappApplicationTest.java:55)
+Caused by: com.jayway.jsonpath.PathNotFoundException: No results for path: $['prompt']
+
+com.examly.springapp.SpringappConversationTests.GetConversationsByCategoryReturns200  Time elapsed: 0.033 s  <<< FAILURE!
+java.lang.AssertionError: No value at JSON path "$[0].prompt"
+	at com.examly.springapp.SpringappConversationTests.GetConversationsByCategoryReturns200(SpringappApplicationTest.java:80)
+Caused by: com.jayway.jsonpath.PathNotFoundException: No results for path: $[0]['prompt']
+
