@@ -3,6 +3,9 @@ package com.examly.springapp.controller;
 import com.examly.springapp.model.Conversation;
 import com.examly.springapp.service.ConversationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -23,6 +26,31 @@ public class ConversationController {
     @GetMapping("/allConversations")
     public ResponseEntity<List<Conversation>> getAllConversations() {
         return ResponseEntity.ok(service.getAllConversations());
+    }
+    
+    @GetMapping("/conversations")
+    public ResponseEntity<Page<Conversation>> getConversations(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(service.getConversations(pageable));
+    }
+    
+    @GetMapping("/conversationsByCategory")
+    public ResponseEntity<Page<Conversation>> getConversationsByCategory(
+            @RequestParam String category,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(service.getConversationsByCategory(category, pageable));
+    }
+    
+    @GetMapping("/conversationsSortedByTime")
+    public ResponseEntity<Page<Conversation>> getConversationsSortedByTime(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(service.getConversationsSortedByTime(pageable));
     }
     
     @GetMapping("/byCategory")

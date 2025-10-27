@@ -9,6 +9,9 @@ import {
   getConversationsSortedByTime,
   deleteConversation,
   updateConversation,
+  getConversationsPaginated,
+  getConversationsByCategoryPaginated,
+  getConversationsSortedByTimePaginated,
 } from './services/api';
 
 function App() {
@@ -23,6 +26,12 @@ function App() {
   const [errorMessage, setErrorMessage] = useState('');
   const [user, setUser] = useState(() => getStoredUser());
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!getStoredToken());
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(5);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -30,12 +39,29 @@ function App() {
     }
   }, [isAuthenticated]);
 
-  const loadConversations = async () => {
+  const loadConversations = async (page = currentPage, size = pageSize) => {
     setLoading(true);
     setErrorMessage('');
     try {
-      const data = await getAllConversations();
-      setConversations(data);
+      let data;
+      // For now, use the old endpoints and implement client-side pagination
+      if (filter === 'All Conversations') {
+        data = await getAllConversations();
+      } else if (filter === 'sorted') {
+        data = await getConversationsSortedByTime();
+      } else {
+        data = await getConversationsByCategory(filter);
+      }
+      
+      // Client-side pagination
+      const startIndex = page * size;
+      const endIndex = startIndex + size;
+      const paginatedData = data.slice(startIndex, endIndex);
+      
+      setConversations(paginatedData);
+      setTotalPages(Math.ceil(data.length / size));
+      setTotalElements(data.length);
+      setCurrentPage(page);
       setApiError(false);
     } catch (error) {
       console.error('Error loading conversations:', error);
@@ -113,25 +139,30 @@ function App() {
   const handleFilterChange = async (e) => {
     const value = e.target.value;
     setFilter(value);
-    setLoading(true);
-    setErrorMessage('');
+    setCurrentPage(0); // Reset to first page when filter changes
+    await loadConversations(0, pageSize);
+  };
 
-    try {
-      if (value === 'All Conversations') {
-        const data = await getAllConversations();
-        setConversations(data);
-      } else if (value === 'sorted') {
-        const data = await getConversationsSortedByTime();
-        setConversations(data);
-      } else {
-        const data = await getConversationsByCategory(value);
-        setConversations(data);
-      }
-    } catch (error) {
-      console.error('Error filtering conversations:', error);
-      setErrorMessage(error.message || 'Failed to filter conversations');
-    } finally {
-      setLoading(false);
+  const handlePageSizeChange = async (e) => {
+    const newSize = parseInt(e.target.value);
+    setPageSize(newSize);
+    setCurrentPage(0); // Reset to first page when page size changes
+    await loadConversations(0, newSize);
+  };
+
+  const handlePageChange = async (newPage) => {
+    await loadConversations(newPage, pageSize);
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 0) {
+      handlePageChange(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages - 1) {
+      handlePageChange(currentPage + 1);
     }
   };
 
@@ -233,14 +264,80 @@ function App() {
       </form>
 
       <div className="controls">
-        <select value={filter} onChange={handleFilterChange}>
-          <option value="All Conversations">All Conversations</option>
-          <option value="General">General</option>
-          <option value="Education">Education</option>
-          <option value="Coding">Coding</option>
-          <option value="Career">Career</option>
-          <option value="sorted">Sorted by Time</option>
-        </select>
+        <div className="filter-controls">
+          <select value={filter} onChange={handleFilterChange}>
+            <option value="All Conversations">All Conversations</option>
+            <option value="General">General</option>
+            <option value="Education">Education</option>
+            <option value="Coding">Coding</option>
+            <option value="Career">Career</option>
+            <option value="Technology">Technology</option>
+            <option value="Science">Science</option>
+            <option value="Health">Health</option>
+            <option value="Business">Business</option>
+            <option value="Environment">Environment</option>
+            <option value="sorted">Sorted by Time</option>
+          </select>
+        </div>
+        
+        <div className="pagination-controls">
+          <div className="page-size-selector">
+            <label htmlFor="pageSize">Items per page:</label>
+            <select id="pageSize" value={pageSize} onChange={handlePageSizeChange}>
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+            </select>
+          </div>
+          
+          <div className="page-info">
+            Showing {conversations.length} of {totalElements} conversations
+            (Page {currentPage + 1} of {totalPages})
+          </div>
+          
+          <div className="page-navigation">
+            <button 
+              onClick={handlePreviousPage} 
+              disabled={currentPage === 0 || loading}
+              className="page-btn"
+            >
+              Previous
+            </button>
+            
+            <div className="page-numbers">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = i;
+                } else if (currentPage < 3) {
+                  pageNum = i;
+                } else if (currentPage >= totalPages - 3) {
+                  pageNum = totalPages - 5 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
+                
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => handlePageChange(pageNum)}
+                    disabled={loading}
+                    className={`page-btn ${currentPage === pageNum ? 'active' : ''}`}
+                  >
+                    {pageNum + 1}
+                  </button>
+                );
+              })}
+            </div>
+            
+            <button 
+              onClick={handleNextPage} 
+              disabled={currentPage >= totalPages - 1 || loading}
+              className="page-btn"
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="chat-list">

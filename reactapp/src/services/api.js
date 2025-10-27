@@ -79,3 +79,31 @@ export const updateConversation = async (id, conversation) => {
     handleError(error);
   }
 };
+
+// Pagination API methods
+export const getConversationsPaginated = async (page = 0, size = 5) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/conversations?page=${page}&size=${size}`);
+    return response.data;
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+export const getConversationsByCategoryPaginated = async (category, page = 0, size = 5) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/conversationsByCategory?category=${category}&page=${page}&size=${size}`);
+    return response.data;
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+export const getConversationsSortedByTimePaginated = async (page = 0, size = 5) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/conversationsSortedByTime?page=${page}&size=${size}`);
+    return response.data;
+  } catch (error) {
+    handleError(error);
+  }
+};
