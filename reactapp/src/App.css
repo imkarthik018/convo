@@ -11,7 +11,7 @@
 /* Header */
 .header {
   padding: 20px;
-  background: #4a90e2;
+  background: #2d56be;
   color: white;
   border-radius: 10px;
   margin-bottom: 20px;
@@ -96,7 +96,7 @@
   min-height: 80px;
 }
 .chat-form button {
-  background: #4a90e2;
+  background: #2d51b6;
   color: white;
   border: none;
   padding: 12px;
@@ -106,7 +106,7 @@
   transition: background 0.3s ease;
 }
 .chat-form button:hover {
-  background: #357ab7;
+  background: #182686;
 }
 .chat-form button:disabled {
   background: #cccccc;

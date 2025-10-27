@@ -4,7 +4,6 @@ com\examly\springapp\payload\AuthRequest.class
 com\examly\springapp\repository\UserRepository.class
 com\examly\springapp\service\UserService.class
 com\examly\springapp\configuration\CorsConfiguration.class
-com\examly\springapp\model\Conversation.class
 com\examly\springapp\payload\AuthResponse.class
 com\examly\springapp\controller\ConversationController.class
 GlobalExceptionHandler.class
