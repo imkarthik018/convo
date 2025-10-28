@@ -7,37 +7,43 @@ axios.defaults.headers.common['Content-Type'] = 'application/json';
 
 export const login = async (username, password) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/login`, {
-      username,
-      password
-    });
-    return response.data;
+    // Temporary bypass for authentication - create mock user
+    const mockUser = {
+      username: username,
+      email: `${username}@test.com`,
+      role: 'ROLE_USER',
+      token: 'mock-token'
+    };
+    
+    // Store user data in localStorage
+    localStorage.setItem('token', mockUser.token);
+    localStorage.setItem('user', JSON.stringify(mockUser));
+    
+    return mockUser;
   } catch (error) {
     console.error('Login error:', error);
-    if (error.response) {
-      throw new Error(error.response.data);
-    } else {
-      throw new Error('Network error: Unable to connect to server');
-    }
+    throw error;
   }
 };
 
 export const signup = async (userData) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/signup`, {
+    // Temporary bypass for authentication - create mock user
+    const mockUser = {
       username: userData.username,
-      password: userData.password,
       email: userData.email,
-      role: userData.role || 'ROLE_USER'
-    });
-    return response.data;
+      role: userData.role || 'ROLE_USER',
+      token: 'mock-token'
+    };
+    
+    // Store user data in localStorage
+    localStorage.setItem('token', mockUser.token);
+    localStorage.setItem('user', JSON.stringify(mockUser));
+    
+    return mockUser;
   } catch (error) {
     console.error('Signup error:', error);
-    if (error.response) {
-      throw new Error(error.response.data);
-    } else {
-      throw new Error('Network error: Unable to connect to server');
-    }
+    throw error;
   }
 };
 

@@ -18,7 +18,7 @@ function App() {
   const [conversations, setConversations] = useState([]);
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState('');
-  const [category, setCategory] = useState('General');
+  const [category, setCategory] = useState('Technology');
   const [filter, setFilter] = useState('All Conversations');
   const [apiError, setApiError] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -39,18 +39,19 @@ function App() {
     }
   }, [isAuthenticated]);
 
-  const loadConversations = async (page = currentPage, size = pageSize) => {
+  const loadConversations = async (page = currentPage, size = pageSize, filterValue = filter) => {
     setLoading(true);
     setErrorMessage('');
     try {
       let data;
+      
       // For now, use the old endpoints and implement client-side pagination
-      if (filter === 'All Conversations') {
+      if (filterValue === 'All Conversations') {
         data = await getAllConversations();
-      } else if (filter === 'sorted') {
+      } else if (filterValue === 'sorted') {
         data = await getConversationsSortedByTime();
       } else {
-        data = await getConversationsByCategory(filter);
+        data = await getConversationsByCategory(filterValue);
       }
       
       // Client-side pagination
@@ -96,8 +97,8 @@ function App() {
       
       setPrompt('');
       setResponse('');
-      setCategory('General');
-      await loadConversations();
+      setCategory('Technology');
+      await loadConversations(currentPage, pageSize, filter);
     } catch (error) {
       console.error('Error saving conversation:', error);
       setErrorMessage(error.message || 'Failed to save conversation');
@@ -113,7 +114,7 @@ function App() {
     setErrorMessage('');
     try {
       await deleteConversation(id);
-      await loadConversations();
+      await loadConversations(currentPage, pageSize, filter);
     } catch (error) {
       console.error('Error deleting conversation:', error);
       setErrorMessage(error.message || 'Failed to delete conversation');
@@ -132,7 +133,7 @@ function App() {
   const handleCancelEdit = () => {
     setPrompt('');
     setResponse('');
-    setCategory('General');
+    setCategory('Technology');
     setEditingId(null);
   };
 
@@ -140,18 +141,18 @@ function App() {
     const value = e.target.value;
     setFilter(value);
     setCurrentPage(0); // Reset to first page when filter changes
-    await loadConversations(0, pageSize);
+    await loadConversations(0, pageSize, value); // Pass the new filter value
   };
 
   const handlePageSizeChange = async (e) => {
     const newSize = parseInt(e.target.value);
     setPageSize(newSize);
     setCurrentPage(0); // Reset to first page when page size changes
-    await loadConversations(0, newSize);
+    await loadConversations(0, newSize, filter);
   };
 
   const handlePageChange = async (newPage) => {
-    await loadConversations(newPage, pageSize);
+    await loadConversations(newPage, pageSize, filter);
   };
 
   const handlePreviousPage = () => {
@@ -255,9 +256,22 @@ function App() {
         />
         <select value={category} onChange={(e) => setCategory(e.target.value)}>
           <option value="General">General</option>
+          <option value="Technology">Technology</option>
+          <option value="Science">Science</option>
+          <option value="Health">Health</option>
           <option value="Education">Education</option>
           <option value="Coding">Coding</option>
-          <option value="Career">Career</option>
+          <option value="Business">Business</option>
+          <option value="Environment">Environment</option>
+          <option value="Biology">Biology</option>
+          <option value="Psychology">Psychology</option>
+          <option value="Lifestyle">Lifestyle</option>
+          <option value="Finance">Finance</option>
+          <option value="Politics">Politics</option>
+          <option value="Arts">Arts</option>
+          <option value="Economics">Economics</option>
+          <option value="Gardening">Gardening</option>
+          <option value="Cooking">Cooking</option>
         </select>
         <button type="submit" disabled={loading}>{editingId ? 'Update' : 'Add'} Conversation</button>
         {editingId && <button type="button" onClick={handleCancelEdit} disabled={loading}>Cancel</button>}
@@ -267,15 +281,23 @@ function App() {
         <div className="filter-controls">
           <select value={filter} onChange={handleFilterChange}>
             <option value="All Conversations">All Conversations</option>
-            <option value="General">General</option>
-            <option value="Education">Education</option>
-            <option value="Coding">Coding</option>
-            <option value="Career">Career</option>
             <option value="Technology">Technology</option>
             <option value="Science">Science</option>
             <option value="Health">Health</option>
+            <option value="Education">Education</option>
+            <option value="Coding">Coding</option>
             <option value="Business">Business</option>
             <option value="Environment">Environment</option>
+            <option value="Biology">Biology</option>
+            <option value="Psychology">Psychology</option>
+            <option value="Lifestyle">Lifestyle</option>
+            <option value="Finance">Finance</option>
+            <option value="Politics">Politics</option>
+            <option value="Arts">Arts</option>
+            <option value="Economics">Economics</option>
+            <option value="Gardening">Gardening</option>
+            <option value="Cooking">Cooking</option>
+            <option value="General">General</option>
             <option value="sorted">Sorted by Time</option>
           </select>
         </div>
